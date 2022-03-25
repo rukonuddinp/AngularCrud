@@ -1,0 +1,78 @@
+<table class="table table-striped">
+  <tr>
+    <th>Shop_Id</th>
+    <th>Shop_Name</th>
+    <th>Address</th>
+    <th>MobileNo</th>
+    <th>Action</th>
+    <th>Action</th>
+  </tr>
+
+  <tr *ngFor="let item of shopList">
+    <td>{{ item.Shop_Id }}</td>
+    <td>{{ item.Shop_Name }}</td>
+    <td>{{ item.Address }}</td>
+    <td>{{ item.MobileNo }}</td>
+
+    <td><button (click)="updateEntity(item)">update</button></td>
+    <td><button (click)="deleteEntity(item)">delete</button></td>
+  </tr>
+</table>
+
+<form (ngSubmit)="submitInfo(shopForm, actionType)">
+  <table class="table table-striped">
+    <tr>
+      <th>Shop_Id</th>
+      <th>Shop_Name</th>
+      <th>Address</th>
+      <th>MobileNo</th>
+    </tr>
+
+    <tr>
+      <td>
+        <input
+          type="number"
+          name="Shop_Id"
+          [(ngModel)]="shopForm.Shop_Id"
+          [disabled]="true"
+        />
+      </td>
+      <td>
+        <input
+          #Name="ngModel"
+          type="text"
+          name="Shop_Name"
+          [(ngModel)]="shopForm.Shop_Name"
+          required
+        />
+
+        <div *ngIf="Name.dirty || Name.invalid">
+          <div *ngIf="Name.errors?.required">Name Is required</div>
+        </div>
+      </td>
+      <td>
+        <input type="text" name="Address" [(ngModel)]="shopForm.Address" />
+      </td>
+      <td>
+        <input type="text" name="MobileNo" [(ngModel)]="shopForm.MobileNo" />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3">
+        <select
+          name="actionType"
+          [(ngModel)]="actionType"
+          (ngChangeModel)="actionType = $event"
+        >
+          <option value="1">Insert</option>
+          <option value="2">Update</option>
+          <option value="3">Delete</option>
+        </select>
+      </td>
+    </tr>
+  </table>
+
+  <button type="submit" class="btn btn-secondary btn-lg btn-block">
+    submit
+  </button>
+</form>

@@ -1,0 +1,18 @@
+
+
+nav img{
+    width: 70px;
+}
+
+nav form{
+    float: none;
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+}
+
+.navbar-brand{
+    font-style: italic;
+    font-size:x-large;
+    color: darkturquoise;
+}
