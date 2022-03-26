@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
+import { ApiService } from "../api.service";
 import { Shop_Information } from "../Model/Shop_Information";
-import { shopService } from "../service/shopService";
+import { ShopInfoService } from "../service/shop-info.service";
 
 @Component({
   selector: "app-shop-information-component",
@@ -10,7 +11,6 @@ import { shopService } from "../service/shopService";
 })
 export class ShopInformationComponentComponent implements OnInit, OnDestroy {
   shopList: Shop_Information[] = new Array<Shop_Information>();
-  shopService: shopService;
   shopForm: Shop_Information = new Shop_Information();
   actionType: number;
 
@@ -20,9 +20,7 @@ export class ShopInformationComponentComponent implements OnInit, OnDestroy {
   subs4: Subscription = new Subscription();
   subs5: Subscription = new Subscription();
 
-  constructor(_shopService: shopService) {
-    this.shopService = _shopService;
-  }
+  constructor(private shopService: ShopInfoService) {}
 
   ngOnInit() {
     this.loadData();

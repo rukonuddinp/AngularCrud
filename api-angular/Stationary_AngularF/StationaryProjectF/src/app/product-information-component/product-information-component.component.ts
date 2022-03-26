@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Shop_Information } from "../Model/Shop_Information";
 import { Product_Information } from "../Model/Product_Information";
-import { shopService } from "../service/shopService";
-import { productService } from "../service/productService";
 import { Subscription } from "rxjs";
+import { ShopInfoService } from "../service/shop-info.service";
+import { ProductService } from "../service/product.service";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: "app-product-information-component",
@@ -12,23 +13,35 @@ import { Subscription } from "rxjs";
 })
 export class ProductInformationComponentComponent implements OnInit, OnDestroy {
   productList: Product_Information[] = new Array<Product_Information>();
-  prodtService: productService;
-  shopService: shopService;
-  prodForm: Product_Information = new Product_Information();
+
+  prodForm: FormGroup;
   shopList: Shop_Information[] = new Array<Shop_Information>();
-  actionType: number;
 
   subs: Subscription = new Subscription();
   subs2: Subscription = new Subscription();
 
-  constructor(_prodtService: productService, _shopService: shopService) {
-    this.prodtService = _prodtService;
-    this.shopService = _shopService;
-    this.prodForm.Product_Id = 0;
+  constructor(
+    private prodtService: ProductService,
+    private shopService: ShopInfoService,
+    private fb: FormBuilder
+  ) {
+    // this.prodForm.Product_Id = 0;
     this.loadDataShop();
   }
 
   ngOnInit() {
+    this.prodForm = this.fb.group({
+      Product_Id: [null],
+      Product_Name: ["", Validators.required],
+      Quantity: ["", Validators.required],
+      Price: [0],
+      IsAvailable: [false],
+      OrderDate: [new Date().toLocaleDateString(), [Validators.required]],
+      Image: ["", Validators.required],
+      Shop_Id: undefined,
+      Shop_Name: ["", Validators.required],
+      actionType: 1,
+    });
     this.loadData();
   }
 
@@ -36,101 +49,63 @@ export class ProductInformationComponentComponent implements OnInit, OnDestroy {
     return new Date(date).toDateString();
   }
 
-  async loadDataShop() {
-    this.shopService.getData();
-    this.waitForShopResult();
-  }
-
-  getShopList(): Shop_Information[] {
-    return this.shopList;
-  }
-
-  waitForShopResult() {
-    var jData = JSON.parse(localStorage.getItem("Data_Shop"));
-    if (!Object.is(jData, null)) {
-      for (var v = 0; v < jData.length; v++) {
-        this.shopList.push(
-          new Shop_Information(
-            Number(jData[v].Shop_Id),
-            jData[v].Shop_Name,
-            jData[v].Address,
-            jData[v].MobileNo
-          )
-        );
-      }
-    } else {
-      // setTimeout(()=> {
-      //   this.waitForShopResult();
-      // },1500);
-    }
+  loadDataShop() {
+    this.shopService.getData().subscribe((res: any) => {
+      this.shopList = res.map((item) => {
+        return {
+          Address: item["address"],
+          MobileNo: item["mobileNo"],
+          Shop_Id: item["shop_Id"],
+          Shop_Name: item["shop_Name"],
+        };
+      });
+      this.prodForm.get("Shop_Id").setValue(this.shopList[0].Shop_Id);
+    });
   }
 
   loadData() {
+    this.loadDataShop();
+
     this.subs2 = this.prodtService.getData().subscribe(
       (res: Product_Information[]) => {
         this.productList = res;
+        console.log(res);
       },
       (err) => console.log
     );
   }
 
-  submitInfo(prodForm: Product_Information, actionType: Number) {
-    console.log("#################");
-    console.log(prodForm.OrderDate);
-    console.log("#########@@@@@@@@########");
-    console.log("prodForm");
-    console.log(prodForm);
+  submitInfo() {
+    const values = this.prodForm.getRawValue();
+    const actionType = values["actionType"];
     console.log(actionType);
 
+    console.log(values);
+
     if (actionType == 1) {
-      this.subs = this.prodtService.insertData(prodForm).subscribe((data) => {
+      this.subs = this.prodtService.insertData(values).subscribe((data) => {
         this.productList.push(data);
-        console.log(prodForm, data);
+        console.log("INSERTED");
       });
     } else if (actionType == 2) {
-      console.log("update");
-      this.prodtService.updateData(prodForm);
-    } else {
-      this.prodtService.deleteData(prodForm);
+      this.prodtService.updateData(values).subscribe((res) => {
+        console.log("UPDATED");
+      });
+    } else if (actionType == 3) {
+      this.prodtService.deleteData(values["Shop_Id"]).subscribe((res) => {
+        console.log("Deleted");
+      });
     }
 
     this.loadData();
   }
 
-  upload(event) {
-    var file = event.target.files[0];
-    var filereader = new FileReader();
-    filereader.onload = function () {
-      var image64string = filereader.result.toString();
-      console.log(image64string);
-      localStorage.setItem("Image", image64string);
+  onUpload(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.prodForm.get("Image").setValue(e.target.result);
     };
-    filereader.readAsDataURL(file);
-    this.prodForm.Image = localStorage.getItem("Image");
-  }
-
-  updateEntity(item) {
-    this.prodForm.Product_Id = item.product_Id;
-    this.prodForm.Product_Name = item.product_Name;
-    this.prodForm.Quantity = item.quantity;
-    this.prodForm.Price = item.price;
-    this.prodForm.IsAvailable = item.isAvailable;
-    this.prodForm.Image = item.image;
-    this.prodForm.Shop_Id = item.shop_Id;
-    this.prodForm.OrderDate = new Date(item.orderDate);
-    this.actionType = 2;
-  }
-
-  deleteEntity(item) {
-    this.prodForm.Product_Id = item.product_Id;
-    this.prodForm.Product_Name = item.product_Name;
-    this.prodForm.Quantity = item.quantity;
-    this.prodForm.Price = item.price;
-    this.prodForm.IsAvailable = item.isAvailable;
-    this.prodForm.Image = item.image;
-    this.prodForm.Shop_Id = item.shop_Id;
-
-    this.actionType = 3;
+    reader.readAsDataURL(file);
   }
 
   ngOnDestroy(): void {

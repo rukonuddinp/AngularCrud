@@ -1,105 +1,110 @@
+<table class="table table-striped">
+  <tr>
+    <th>Product_Id</th>
+    <th>Product_Name</th>
+    <th>Quantity</th>
+    <th>Price</th>
+    <th>IsAvailable</th>
+    <th>OrderDate</th>
+    <th>Image</th>
+    <!-- <th>Shop_Name</th> -->
 
+    <th>update</th>
+    <th>delete</th>
+  </tr>
+
+  <!-- <tr *ngFor="let item of productList">
+    <td>{{ item.product_Id }}</td>
+    <td>{{ item.product_Name }}</td>
+    <td>{{ item.quantity }}</td>
+    <td>{{ item.price }}</td>
+    <td><input type="checkbox" [checked]="item.IsAvailable" /></td>
+    <td>
+      {{ dateChange(item.orderDate) }}
+    </td>
+    <td><img src="{{ item.image }}" width="50" height="50" /></td>
+    <td>{{item.Shop_Name}}</td>
+
+    <td><button (click)="updateEntity(item)">update</button></td>
+    <td><button (click)="deleteEntity(item)">delete</button></td>
+  </tr> -->
+</table>
+
+<form novalidate (ngSubmit)="submitInfo()" [formGroup]="prodForm">
   <table class="table table-striped">
- 
     <tr>
-      <th>Product_Id </th>
-      <th>Product_Name </th>
-      <th>Quantity </th>
-      <th> Price</th>
+      <th>Product_Name</th>
+      <th>Quantity</th>
+      <th>Price</th>
       <th>IsAvailable</th>
       <th>OrderDate</th>
-      <th>Image</th>
-      <!-- <th>Shop_Name</th> -->
-
-      <th>update</th>
-      <th>delete</th>
     </tr>
 
-    
-    
-    <tr *ngFor="let item of productList">
-      <td>{{item.product_Id}}</td>
-      <td>{{item.product_Name}}</td>
-      <td>{{item.quantity}}</td>
-      <td>{{item.price}}</td>
-      <td><input type="checkbox" [checked]="item.IsAvailable" /></td>
+    <tr>
+      <input
+        type="hidden"
+        name="Product_Id"
+        formControlName="Product_Id"
+        [disabled]="true"
+      />
+
       <td>
-        {{dateChange(item.orderDate)}}
+        <input type="text" name="Product_Name" formControlName="Product_Name" />
       </td>
-      <td><img src={{item.image}} width="50" height="50"/> </td>
-      <!-- <td>{{item.Shop_Name}}</td> -->
-    
-      <td ><button (click)="updateEntity(item)">update</button></td>
-      <td ><button (click)="deleteEntity(item)">delete</button></td>
-    
+      <td>
+        <input type="text" name="Quantity" formControlName="Quantity" />
+      </td>
+      <td><input type="number" name="Price" formControlName="Price" /></td>
+      <td>
+        <input
+          type="checkbox"
+          name="IsAvailable"
+          formControlName="IsAvailable"
+        />
+      </td>
+      <td>
+        <input type="date" name="OrderDate" formControlName="OrderDate" />
+      </td>
     </tr>
-    
-    </table>
-    
-    <form novalidate (ngSubmit)="submitInfo(prodForm, actionType )">
-    
-      <table class="table table-striped" >
-     
-        <tr>
-          <th>Product_Id </th>
-          <th>Product_Name </th>
-          <th>Quantity </th>
-          <th> Price</th>
-          <th>IsAvailable</th>
-          <th>OrderDate</th>
-          
-        </tr>
 
-        
-        
-        <tr>
-          <td><input type="number" name="Product_Id" [(ngModel)]="prodForm.Product_Id" [disabled]="true"/></td>
-          <td><input type="text" name="Product_Name" [(ngModel)]="prodForm.Product_Name"/></td>
-          <td><input type="text" name="Quantity" [(ngModel)]="prodForm.Quantity"/></td>
-          <td><input type="number" name="Price" [(ngModel)]="prodForm.Price"/></td>
-          <td><input type="checkbox" name="IsAvailable" [(ngModel)]="prodForm.IsAvailable"/></td>
-          <td>
-            <input type="date" name="OrderDate" [(ngModel)]="prodForm.OrderDate" (ngModelChange)="prodForm.OrderDate = $event"/></td>
+    <tr>
+      <th>Image</th>
+      <th>Shop_Name</th>
+      <th>Action</th>
+    </tr>
 
-        </tr>
+    <tr>
+      <td>
+        <input
+          type="file"
+          name="Image"
+          (onChange)="onUpload($event.target.value[0])"
+          formControlName="Image"
+        />
+        <img width="50" height="50" />
+      </td>
 
-        <tr>
-          <th>Image</th>
-          <th>Shop_Name</th>
-          <th>Action</th>
-        </tr>
-
-        <tr>
-          <td>
-            <input type="file" name="Image" (change)="upload($event)"/>
-            <img src="{{prodForm.Image}}" width="50" height="50"/>
-          </td>
-
-          
-          <td>
-            <select [(ngModel)]="prodForm.Shop_Id" name="Shop_Id">
-              <option *ngFor="let item of getShopList()" [value]="item.Shop_Id"
-               (ngChangeModel)="prodForm.Shop_Id=$event">{{item.Shop_Name}}</option>
-            </select>
-          
-          
-          </td>
-          <td colspan="3">
-            <select name="actionType" [(ngModel)]="actionType" (ngChangeModel)="actionType=$event">
-              <option value="1">Insert</option>
-              <option value="2">Update</option>
-              <option value="3">Delete</option>
-            </select>
-          </td>
-    
-    
-        </tr>
-        <button type="submit" class="btn btn-secondary btn-lg btn-block">submit</button>
-      
-        </table>
-    
-        
-    </form>
-    
-    
-    
+      <td>
+        <select formControlName="Shop_Id" name="Shop_Id">
+          <option
+            *ngFor="let item of shopList"
+            [value]="item?.Shop_Id"
+            [selected]="item?.Shop_Id == shopList[0]?.Shop_Id"
+          >
+            {{ item?.Shop_Name }}
+          </option>
+        </select>
+      </td>
+      <td colspan="3">
+        <select name="actionType" formControlName="actionType">
+          <option [value]="1">Insert</option>
+          <option [value]="2">Update</option>
+          <option [value]="3">Delete</option>
+        </select>
+      </td>
+    </tr>
+    <button type="submit" class="btn btn-secondary btn-lg btn-block">
+      submit
+    </button>
+  </table>
+</form>
